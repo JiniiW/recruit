@@ -1,0 +1,27 @@
+{{>layout/header}}
+
+{{userId}}
+<form id="joinForm" action="/api/recruits/{{id}}/join?userId={{userId}}" method="post">
+    <button type="submit" style="font-size: 13px; color: #fff; background: #3b82f6; border: none; padding: 7px 16px; border-radius: 6px; font-weight: 500; cursor: pointer;">
+        참가하기
+    </button>
+</form>
+
+{{>layout/footer}}
+
+<script>
+    document.getElementById("joinForm").addEventListener("submit", function(e) {
+        e.preventDefault();  // form 기본 동작 막기
+
+        fetch(this.action, { method: "POST" })
+                .then(response => {
+                    if (response.ok) {
+                        // 성공하면 상세 페이지로 이동
+                        location.href = "/recruits/list/{{id}}?userId={{userId}}";
+                    }
+                });
+    });
+</script>
+
+<!-- 하단에 js 파일 import -->
+<script src="/js/recruit.js"></script>
