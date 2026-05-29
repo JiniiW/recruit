@@ -8,7 +8,7 @@ import java.util.List;
 
 /**
  * File: CommentService.java
- * Description: 작성/삭제 및 본인 확인 비즈니스 로직 처리
+ * Description: 댓글 조회/작성/삭제 비즈니스 로직 인터페이스
  */
 public interface CommentService {
     // 특정 모집글 댓글 목록 조회

@@ -9,7 +9,7 @@ async function submitRecruit(e, userId) {
     const isUpdate = data.id != null && data.id !== "";
 
     if (isUpdate) {
-        await fetch(`/api/recruits/${data.id}`, {
+        const response = await fetch(`/api/recruits/${data.id}`, {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -18,8 +18,12 @@ async function submitRecruit(e, userId) {
                 maxCount: Number(data.maxCount)
             })
         });
+        if (!response.ok) {
+            alert('수정에 실패했습니다.');
+            return;
+        }
     } else {
-        await fetch("/api/recruits", {
+        const response = await fetch("/api/recruits", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -27,6 +31,10 @@ async function submitRecruit(e, userId) {
                 maxCount: Number(data.maxCount)
             })
         });
+        if (!response.ok) {
+            alert('등록에 실패했습니다.');
+            return;
+        }
     }
 
     location.href = `/recruits?userId=${userId}`;
@@ -38,8 +46,12 @@ async function submitRecruit(e, userId) {
 async function deleteRecruit(id, userId) {
     if (!confirm('정말 흔적을 인멸하시겠습니까?')) return;
 
-    await fetch(`/api/recruits/${id}`, { method: "DELETE" });
-    location.href = `/recruits?userId=${userId}`;
+    const response = await fetch(`/api/recruits/${id}`, { method: "DELETE" });
+    if (response.ok) {
+        location.href = `/recruits?userId=${userId}`;
+    } else {
+        alert('삭제에 실패했습니다.');
+    }
 }
 
 /* =====================

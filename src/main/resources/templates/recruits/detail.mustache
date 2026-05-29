@@ -4,7 +4,8 @@
     <div class="container mt-5">
         <div class="card shadow-sm">
 
-            <div class="card-header bg-dark text-white d-flex align-items-center justify-content-between">
+            <!-- 모집글 헤더: 지역, 제목, 상태 배지 -->
+            <div class="card-header text-dark d-flex align-items-center justify-content-between" style="background-color: #e2e3e5;">
                 <h4 class="mb-0">[{{district}}] {{title}}</h4>
                 {{#isOpen}}
                     <span class="badge bg-success">OPEN</span>
@@ -18,6 +19,7 @@
             </div>
 
             <div class="card-body">
+                <!-- 모집글 기본 정보 테이블 -->
                 <table class="table table-bordered mt-2">
                     <tbody>
                     <tr>
@@ -47,6 +49,7 @@
 
                 <!-- 참여/수정/삭제 버튼 -->
                 <div class="text-center my-4">
+                    <!-- 작성자: CLOSED가 아닐 때만 수정/삭제 표시 -->
                     {{#isAuthor}}
                         {{^isClosed}}
                             <a href="/recruits/{{id}}/edit?userId={{userId}}" class="btn btn-primary">
@@ -60,6 +63,7 @@
                         {{/isClosed}}
                     {{/isAuthor}}
 
+                    <!-- 비작성자: 상태별 버튼 분기 -->
                     {{^isAuthor}}
                         {{#isClosed}}
                             <button type="button" class="btn btn-secondary" disabled>
@@ -68,6 +72,7 @@
                         {{/isClosed}}
 
                         {{#isFull}}
+                            <!-- 참여자: 취소 가능 / 비참여자: 모집 완료(비활성) -->
                             {{#isParticipant}}
                                 <button type="button"
                                         class="btn btn-outline-danger"
@@ -83,6 +88,7 @@
                         {{/isFull}}
 
                         {{#isOpen}}
+                            <!-- 참여자: 취소 가능 / 비참여자: 참여 신청 가능 -->
                             {{#isParticipant}}
                                 <button type="button"
                                         class="btn btn-outline-danger"
@@ -105,7 +111,7 @@
 
                 <!-- 댓글 작성 -->
                 <h5 class="fw-bold mt-4">댓글</h5>
-                <form onsubmit="submitComment(event, {{id}}, '{{userId}}')">
+                <form onsubmit="submitComment(event, {{recruitId}}, '{{userId}}')">
                     <div class="mb-3">
                         <textarea id="commentContent"
                                   name="content"
@@ -121,20 +127,22 @@
 
                 <hr>
 
-                <!-- 댓글 목록 -->
+                <!-- 댓글 목록: 본인 댓글만 삭제 버튼 표시 -->
                 <div id="commentList">
                     {{#comments}}
-                        <div class="card mb-2 comment-item" data-comment-id="{{id}}">
+                        <div class="card mb-2 comment-item">
                             <div class="card-body">
                                 <p class="mb-1"><strong>{{userId}}</strong></p>
-                                <p class="mb-2">{{content}}</p>
-                                {{#commentOwner}}
-                                    <button type="button"
-                                            class="btn btn-sm btn-outline-danger"
-                                            onclick="deleteComment({{id}}, {{recruitId}}, '{{userId}}')">
-                                        댓글 삭제
-                                    </button>
-                                {{/commentOwner}}
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <p class="mb-0">{{content}}</p>
+                                    {{#commentOwner}}
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-danger"
+                                                onclick="deleteComment({{id}}, {{recruitId}}, '{{userId}}')">
+                                            댓글 삭제
+                                        </button>
+                                    {{/commentOwner}}
+                                </div>
                             </div>
                         </div>
                     {{/comments}}

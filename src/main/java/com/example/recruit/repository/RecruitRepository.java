@@ -8,12 +8,8 @@ import java.util.ArrayList;
 
 /**
  * File: RecruitRepository.java
- * Description: RecruitRepository 데이터베이스 접근 인터페이스
+ * Description: recruit 테이블 데이터베이스 접근 인터페이스
  */
-
 @Repository
 public interface RecruitRepository extends JpaRepository<Recruit, Long> {
-    @Override
-    ArrayList<Recruit> findAll();
-
 }

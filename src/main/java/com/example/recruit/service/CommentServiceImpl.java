@@ -10,10 +10,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-
+/**
+ * File: CommentServiceImpl.java
+ * Description: CommentService 구현체 - 댓글 조회/작성/삭제 처리
+ */
+@Slf4j
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class CommentServiceImpl implements CommentService{
 
     // 댓글과 모집글 참조
@@ -60,6 +63,7 @@ public class CommentServiceImpl implements CommentService{
             log.info("댓글 삭제 실패: 모집글 번호가 일치하지 않습니다. recruitId=" + recruitId);
             return null;
         }
+
         // 본인이 쓴 댓글만 삭제 가능하게 만드는 핵심
         if (!target.getUserId().equals(userId)) {
             log.info("댓글 삭제 실패: 작성자가 아닙니다. userId=" + userId);
@@ -67,7 +71,6 @@ public class CommentServiceImpl implements CommentService{
         }
 
         commentRepository.delete(target);
-
         return target;
     }
 }

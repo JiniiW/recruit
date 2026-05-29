@@ -1,6 +1,5 @@
 package com.example.recruit.entity;
 
-import com.example.recruit.repository.ParticipantRepository;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -15,20 +14,19 @@ import lombok.extern.slf4j.Slf4j;
  * File: Participant.java
  * Description: participant 테이블과 매핑되는 참여자 엔티티
  */
-
 @Entity
-@NoArgsConstructor
 @AllArgsConstructor
-@ToString
-@Slf4j
+@NoArgsConstructor
 @Getter
+@ToString
 public class Participant {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long recruitId;
-    private String userId;
+    private Long recruitId; // 소속 모집글 ID
+    private String userId; // 참여자 ID
 
+    // 신규 참여자 저장 시 사용
     public Participant(Long recruitId, String userId) {
         this.recruitId = recruitId;
         this.userId = userId;

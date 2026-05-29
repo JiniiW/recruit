@@ -9,9 +9,8 @@ import java.util.List;
 
 /**
  * File: RecruitService.java
- * Description: 모집글 CRUD 및 참여/취소, 상태 변경 비즈니스 로직 처리
+ * Description: 모집글 CRUD 및 참여/취소, 상태 변경 비즈니스 로직 인터페이스
  */
-
 public interface RecruitService {
 
     // 모든 모집글 조회
@@ -29,7 +28,7 @@ public interface RecruitService {
     // 모집글 삭제
     Recruit delete(Long id);
 
-    // 모집글 참여자 목록
+    // 모집글 참여자 목록 조회
     List<Participant> getParticipants(Long recruitId);
 
     // 참가 신청
