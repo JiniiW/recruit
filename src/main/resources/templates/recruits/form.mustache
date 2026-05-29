@@ -32,10 +32,10 @@
 
         <div class="mb-3">
             <label class="form-label fw-bold">최대 모집 인원 (명)</label>
-            <!-- 현재 참여 인원 고려 -->
-            <input type="number" class="form-control" name="maxCount"
-                   min="{{currentCount}}" max="10"
-                   value="{{#recruit}}{{maxCount}}{{/recruit}}{{^recruit}}2{{/recruit}}" required>
+                <!-- 수정 시: 현재 참여 인원 이상으로만 변경 가능 / 생성 시: 최소 2명 -->
+                <input type="number" class="form-control" name="maxCount"
+                       min="{{#recruit}}{{currentCount}}{{/recruit}}{{^recruit}}2{{/recruit}}" max="10"
+                       value="{{#recruit}}{{maxCount}}{{/recruit}}{{^recruit}}2{{/recruit}}" required>
         </div>
 
         <div class="mb-3">
