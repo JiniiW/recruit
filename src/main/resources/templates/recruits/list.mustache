@@ -1,5 +1,40 @@
-{{>layout/header}}
+{{>layouts/header}}
 
-{{userId}}
+<div class="container mt-5">
+    <h2 class="mb-4">공범 모집 목록</h2>
 
-{{>layout/footer}}
+    <table class="table table-hover text-center">
+        <thead class="table-dark">
+        <tr>
+            <th scope="col">ID</th>
+            <th scope="col">지역</th>
+            <th scope="col">제목</th>
+            <th scope="col">작성자</th>
+            <th scope="col">모집 인원</th>
+            <th scope="col">상태</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{#recruits}}
+            <tr>
+                <th>{{id}}</th>
+                <td><span class="badge bg-secondary">{{district}}</span></td>
+                <td class="text-start">
+                    <a href="/recruits/{{id}}?userId={{userId}}" class="text-decoration-none text-dark fw-bold">{{title}}</a>
+                </td>
+                <td>{{authorId}}</td>
+                <td><strong>{{maxCount}}</strong> 명</td>
+                <td>{{status}}</td>
+            </tr>
+        {{/recruits}}
+
+        {{^recruits}}
+            <tr>
+                <td colspan="6" class="text-muted py-5">등록된 모집글이 없습니다. 첫 글을 작성해 보세요!</td>
+            </tr>
+        {{/recruits}}
+        </tbody>
+    </table>
+</div>
+
+{{>layouts/footer}}

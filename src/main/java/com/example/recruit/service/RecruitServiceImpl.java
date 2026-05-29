@@ -1,6 +1,7 @@
 package com.example.recruit.service;
 
 import com.example.recruit.dto.ParticipantResponseForm;
+import com.example.recruit.dto.RecruitForm;
 import com.example.recruit.entity.Participant;
 import com.example.recruit.entity.Recruit;
 import com.example.recruit.entity.RecruitStatus;
@@ -11,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +21,48 @@ public class RecruitServiceImpl implements RecruitService{
 
     private final ParticipantRepository participantRepository;
     private final RecruitRepository recruitRepository;
+
+    // 1. 모든 모집글 조회
+    @Override
+    public List<Recruit> index() {
+        return recruitRepository.findAll();
+    }
+
+    // 3. 모집글 생성
+    @Override
+    public Recruit create(RecruitForm dto) {
+        return recruitRepository.save(dto.toEntity());
+    }
+
+    // 4. 모집글 수정
+    @Override
+    public Recruit update(Long id, RecruitForm dto) {
+        Recruit target = recruitRepository.findById(id).orElse(null);
+
+        if (target == null) {
+            log.info("수정 실패: 대상 엔티티가 없습니다. ID=" + id);
+            return null;
+        }
+
+        target.patch(dto);
+        Recruit updated = recruitRepository.save(target);
+        log.info("수정 완료: " + target.toString());
+        return updated;
+    }
+
+    // 5. 모집글 삭제
+    @Override
+    public Recruit delete(Long id) {
+        Recruit target = recruitRepository.findById(id).orElse(null);
+
+        if (target == null) {
+            log.info("해당 Recruit이 없습니다. recruit, {}", target);
+            return null;
+        }
+
+        recruitRepository.delete(target);
+        return target;
+    }
 
     @Override
     public ParticipantResponseForm join(Long recruitId, String userId) {
@@ -100,8 +144,8 @@ public class RecruitServiceImpl implements RecruitService{
 
     // 모집글 마감시간 CLOSED 처리 -> show()에서 테스트
     private void updateRecruitStatus(Recruit recruit){
-        if (recruit.getEndDate() != null
-                && LocalDateTime.now().isAfter(recruit.getEndDate())
+        if (recruit.getEndAt() != null
+                && LocalDateTime.now().isAfter(recruit.getEndAt())
                 && recruit.getStatus() != RecruitStatus.CLOSED) {
             recruit.setStatus(RecruitStatus.CLOSED);
             recruitRepository.save(recruit);

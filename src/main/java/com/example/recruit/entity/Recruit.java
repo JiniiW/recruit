@@ -1,10 +1,8 @@
 package com.example.recruit.entity;
 
+import com.example.recruit.dto.RecruitForm;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -16,6 +14,7 @@ import java.time.LocalDateTime;
  */
 @Entity
 @NoArgsConstructor
+@AllArgsConstructor
 @ToString
 @Slf4j
 @Getter
@@ -26,6 +25,8 @@ public class Recruit {
     Long id;
 
     private String title;
+    private String content;
+    private String authorId;
 
     private int maxCount;
 
@@ -33,6 +34,18 @@ public class Recruit {
     private RecruitStatus status = RecruitStatus.OPEN;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
-    private LocalDateTime endDate;
+    private LocalDateTime endAt;
+    private String district;
+
+    public void patch(RecruitForm dto) {
+        if (dto.getTitle() != null)
+            this.title = dto.getTitle();
+        if (dto.getContent() != null)
+            this.content = dto.getContent();
+        if (dto.getDistrict() != null)
+            this.district = dto.getDistrict();
+        if (dto.getMaxCount() > 0)
+            this.maxCount = dto.getMaxCount();
+    }
 
 }

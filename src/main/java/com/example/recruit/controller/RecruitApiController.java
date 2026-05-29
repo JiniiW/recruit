@@ -1,9 +1,9 @@
 package com.example.recruit.controller;
 
 import com.example.recruit.dto.ParticipantResponseForm;
-import com.example.recruit.entity.Participant;
+import com.example.recruit.dto.RecruitForm;
+import com.example.recruit.entity.Recruit;
 import com.example.recruit.service.RecruitService;
-import jakarta.servlet.http.Part;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -22,13 +22,37 @@ public class RecruitApiController {
 
     private final RecruitService recruitService;
 
+    // 1. 모집글 생성
+    @PostMapping
+    public Recruit create(@RequestBody RecruitForm dto) {
+        log.info("모집글 생성 - 상세정보: {}", dto.toString());
+
+        return recruitService.create(dto);
+
+    }
+
+    // 2. 모집글 수정
+    @PatchMapping("/{id}")
+    public ResponseEntity<Recruit> update(@PathVariable Long id, @RequestBody RecruitForm dto) {
+
+        Recruit updated = recruitService.update(id, dto);
+
+        return (updated != null) ? ResponseEntity.ok(updated) : ResponseEntity.notFound().build();
+    }
+
+    // 3. 모집글 삭제
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Recruit> delete(@PathVariable Long id) {
+
+        Recruit deleted = recruitService.delete(id);
+
+        return (deleted != null)? ResponseEntity.ok(deleted) : ResponseEntity.notFound().build();
+    }
+
     // 참여신청
     @PostMapping("/{id}/join")
     public ResponseEntity<ParticipantResponseForm> join(@PathVariable Long id, @RequestParam String userId, RedirectAttributes rttr){
         ParticipantResponseForm join = recruitService.join(id, userId);
-//        if(join != null){
-//            rttr.addFlashAttribute("msg", "참가.");
-//        }
         return (join != null) ? ResponseEntity.ok(join) : ResponseEntity.notFound().build();
     }
 
@@ -36,9 +60,6 @@ public class RecruitApiController {
     @PostMapping("/{id}/leave")
     public ResponseEntity<ParticipantResponseForm> leave(@PathVariable Long id, @RequestParam String userId, RedirectAttributes rttr){
         ParticipantResponseForm leave = recruitService.leave(id, userId);
-//        if(leave != null){
-//            rttr.addFlashAttribute("msg", "참가 취소.");
-//        }
         return (leave != null) ? ResponseEntity.ok(leave) : ResponseEntity.badRequest().build();
     }
 }

@@ -1,4 +1,4 @@
-{{>layout/header}}
+{{>layouts/header}}
 
 {{userId}}
 <form id="joinForm" action="/api/recruits/{{id}}/join?userId={{userId}}" method="post">
@@ -6,22 +6,17 @@
         참가하기
     </button>
 </form>
+<div class="card-footer d-flex justify-content-between align-items-center bg-light">
+    <a href="/recruits" class="btn btn-secondary">목록으로</a>
 
-{{>layout/footer}}
+    <div class="d-flex gap-2">
+        <a href="/recruits/{{id}}/edit?userId={{userId}}" class="btn btn-primary">수정하기</a>
 
-<script>
-    document.getElementById("joinForm").addEventListener("submit", function(e) {
-        e.preventDefault();  // form 기본 동작 막기
+        <a href="#" class="btn btn-danger" onclick="deleteRecruit({{id}}, '{{userId}}')"">삭제하기</a>
+    </div>
+</div>
 
-        fetch(this.action, { method: "POST" })
-                .then(response => {
-                    if (response.ok) {
-                        // 성공하면 상세 페이지로 이동
-                        location.href = "/recruits/list/{{id}}?userId={{userId}}";
-                    }
-                });
-    });
-</script>
+{{>layouts/footer}}
 
 <!-- 하단에 js 파일 import -->
 <script src="/js/recruit.js"></script>
