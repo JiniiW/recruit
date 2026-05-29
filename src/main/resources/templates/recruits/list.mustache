@@ -4,27 +4,31 @@
     <h5 class="mb-4">공범 모집 목록</h5>
 
     <table class="table table-hover text-center">
-        <thead class="table-dark">
+        <thead class="table-primary">
         <tr>
-            <th scope="col">ID</th>
+            <th scope="col">No</th>
             <th scope="col">지역</th>
             <th scope="col">제목</th>
-            <th scope="col">작성자</th>
             <th scope="col">모집 인원</th>
             <th scope="col">상태</th>
+            <th scope="col">작성자</th>
         </tr>
         </thead>
         <tbody>
         {{#recruits}}
             <tr>
                 <th>{{id}}</th>
-                <td><span class="badge bg-secondary">{{district}}</span></td>
+                <td><span class="text-muted small">{{district}}</span></td>
                 <td class="text-start">
                     <a href="/recruits/{{id}}?userId={{userId}}" class="text-decoration-none text-dark fw-bold">{{title}}</a>
                 </td>
-                <td>{{authorId}}</td>
                 <td><strong>{{maxCount}}</strong> 명</td>
-                <td>{{status}}</td>
+                <td>
+                    {{#isOpen}}<span class="badge bg-success">OPEN</span>{{/isOpen}}
+                    {{#isFull}}<span class="badge bg-warning text-dark">FULL</span>{{/isFull}}
+                    {{#isClosed}}<span class="badge bg-danger">CLOSED</span>{{/isClosed}}
+                </td>
+                <td>{{authorId}}</td>
             </tr>
         {{/recruits}}
 

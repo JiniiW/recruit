@@ -9,11 +9,13 @@
 
     <form class="card p-4 shadow-sm" onsubmit="submitRecruit(event, '{{userId}}')">
 
+        <!-- 수정 시: 기존 작성자와 id 유지 -->
         {{#recruit}}
             <input type="hidden" name="authorId" value="{{authorId}}">
             <input type="hidden" name="id" value="{{id}}">
         {{/recruit}}
 
+        <!-- 생성 시: 현재 userId가 작성자 -->
         {{^recruit}}
             <input type="hidden" name="authorId" value="{{userId}}">
         {{/recruit}}
@@ -30,7 +32,10 @@
 
         <div class="mb-3">
             <label class="form-label fw-bold">최대 모집 인원 (명)</label>
-            <input type="number" class="form-control" name="maxCount" min="2" max="10" value="{{#recruit}}{{maxCount}}{{/recruit}}{{^recruit}}2{{/recruit}}" required>
+                <!-- 수정 시: 현재 참여 인원 이상으로만 변경 가능 / 생성 시: 최소 2명 -->
+                <input type="number" class="form-control" name="maxCount"
+                       min="{{#recruit}}{{currentCount}}{{/recruit}}{{^recruit}}2{{/recruit}}" max="10"
+                       value="{{#recruit}}{{maxCount}}{{/recruit}}{{^recruit}}2{{/recruit}}" required>
         </div>
 
         <div class="mb-3">

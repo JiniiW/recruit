@@ -15,17 +15,20 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-
+/**
+ * File: RecruitServiceImpl.java
+ * Description: RecruitService 구현체 - 모집글 CRUD 및 참여/취소, 상태 변경 처리
+ */
+@Slf4j
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class RecruitServiceImpl implements RecruitService{
 
     private final RecruitRepository recruitRepository;
     private final ParticipantRepository participantRepository;
     private final CommentRepository commentRepository;
 
-    // 1. 모든 모집글 조회
+    // 1. 모든 모집글 조회 (마감시간 체크 후 반환)
     @Override
     public List<Recruit> index() {
         updateRecruitStatus();
@@ -46,14 +49,13 @@ public class RecruitServiceImpl implements RecruitService{
     // 3. 모집글 생성
     @Override
     public Recruit create(RecruitForm dto) {
-        // 1. 글 생성
         Recruit recruit = recruitRepository.save(dto.toEntity());
 
         if (recruit == null) {
             log.info("참여자 없음");
         }
 
-        // 2. 작성자를 첫 번째 참여자로
+        // 작성자를 첫 번째 참여자로 등록
         Participant author = new Participant(recruit.getId(), dto.getAuthorId());
         participantRepository.save(author);
 
@@ -71,12 +73,21 @@ public class RecruitServiceImpl implements RecruitService{
         }
 
         target.patch(dto);
+
+        // maxCount 변경 시 현재 인원과 비교해서 상태 재검증
+        int currentCount = participantRepository.countByRecruitId(id);
+        if (currentCount >= target.getMaxCount()) {
+            target.setStatus(RecruitStatus.FULL);
+        } else {
+            target.setStatus(RecruitStatus.OPEN);
+        }
+
         Recruit updated = recruitRepository.save(target);
-        log.info("수정 완료: " + target.toString());
+        log.info("모집글 수정 완료: id={}", id);
         return updated;
     }
 
-    // 5. 모집글 삭제
+    // 5. 모집글 삭제 (연관 참여자, 댓글 일괄 삭제)
     @Override
     public Recruit delete(Long id) {
         Recruit target = recruitRepository.findById(id).orElse(null);
@@ -86,49 +97,49 @@ public class RecruitServiceImpl implements RecruitService{
             return null;
         }
 
-        recruitRepository.delete(target);
         participantRepository.deleteByRecruitId(id);
         commentRepository.deleteByRecruitId(id);
+        recruitRepository.delete(target);
 
+        log.info("모집글 삭제 완료: id={}", id);
         return target;
     }
 
-    // 6. 모집글의 참여자
+    // 6. 모집글 참여자 목록 조회
     @Override
     public List<Participant> getParticipants(Long recruitId) {
         return participantRepository.findByRecruitId(recruitId);
     }
 
-    // 7. 모집글 참여
+    // 7. 참여 신청 (참여자 저장 후 인원 초과 시 FULL 처리)
     @Override
     public ParticipantResponseForm join(Long recruitId, String userId) {
-
-        // insert participant
         Participant participant = new Participant(recruitId, userId);
         participantRepository.save(participant);
 
         ParticipantResponseForm response = setParticipantResponse(recruitId, userId, "join");
+        if (response == null) {
+            log.warn("참여 신청 실패 - 응답 생성 실패: recruitId={}, userId={}", recruitId, userId);
+            return null;
+        }
 
-        if (response == null) return null;
-
+        // 현재 인원이 최대 인원 이상이면 FULL 처리
         if (response.getCurrentCount() >= response.getMaxCount()) {
-            Recruit recruit = recruitRepository.findById(recruitId).orElseThrow(() -> new RuntimeException("해당하는 모집글이 없습니다. ID=" + recruitId));
-            recruit.setStatus(RecruitStatus.FULL);
-            recruitRepository.save(recruit); //저장
-            response.setRecruitStatus(RecruitStatus.FULL);
+            Recruit recruit = recruitRepository.findById(recruitId)
+                    .orElseThrow(() -> new RuntimeException("해당하는 모집글이 없습니다. ID=" + recruitId));
+            recruit.setStatus(RecruitStatus.FULL);          // DB 상태 변경
+            recruitRepository.save(recruit);                // DB 저장
+            response.setRecruitStatus(RecruitStatus.FULL);  // 응답 DTO 동기화
         }
 
         response.logInfo();
-
         return response;
     }
 
-    // 모집글 참여 취소
+    // 8. 참여 취소 (참여자 삭제 후 인원 미달 시 OPEN 처리)
     @Override
     @Transactional
     public ParticipantResponseForm leave(Long recruitId, String userId) {
-
-        // delete participant
         Participant participant = participantRepository.deleteByRecruitIdAndUserId(recruitId, userId);
 
         if (participant == null) {
@@ -143,11 +154,13 @@ public class RecruitServiceImpl implements RecruitService{
             return null;
         }
 
+        // 현재 인원이 최대 인원 미만이면 OPEN 처리
         if (response.getCurrentCount() < response.getMaxCount()) {
-            Recruit recruit = recruitRepository.findById(recruitId).orElseThrow(() -> new RuntimeException("해당하는 모집글이 없습니다. ID=" + recruitId));
-            recruit.setStatus(RecruitStatus.OPEN);
-            recruitRepository.save(recruit);
-            response.setRecruitStatus(RecruitStatus.OPEN);
+            Recruit recruit = recruitRepository.findById(recruitId)
+                    .orElseThrow(() -> new RuntimeException("해당하는 모집글이 없습니다. ID=" + recruitId));
+            recruit.setStatus(RecruitStatus.OPEN);          // DB 상태 변경
+            recruitRepository.save(recruit);                // DB 저장
+            response.setRecruitStatus(RecruitStatus.OPEN);  // 응답 DTO 동기화
         }
 
         response.logInfo();
@@ -155,12 +168,12 @@ public class RecruitServiceImpl implements RecruitService{
 
     }
 
-    // ParticipantResponseForm 세팅
+    // 참여 응답 DTO 생성 (현재 참여 인원, 모집 상태 포함)
     private ParticipantResponseForm setParticipantResponse(Long recruitId, String userId, String participantStatus) {
         Recruit recruit = recruitRepository.findById(recruitId).orElse(null);
 
         if (recruit == null) {
-            log.info("해당하는 모집글이 없습니다. ID=" + recruitId);
+            log.warn("응답 생성 실패 - 모집글 없음: recruitId={}", recruitId);
             return null;
         }
 
@@ -177,7 +190,7 @@ public class RecruitServiceImpl implements RecruitService{
         return form;
     }
 
-    // 모집글 마감시간 CLOSED 처리
+    // 마감시간 지난 모집글 CLOSED 처리 (index/show 호출 시 실행)
     private void updateRecruitStatus() {
         List<Recruit> recruits = recruitRepository.findAll();
         for (Recruit recruit : recruits) {
@@ -186,7 +199,7 @@ public class RecruitServiceImpl implements RecruitService{
                     && recruit.getStatus() != RecruitStatus.CLOSED) {
                 recruit.setStatus(RecruitStatus.CLOSED);
                 recruitRepository.save(recruit);
-                log.info("모집 마감 CLOSED. ID={}", recruit.getId());
+                log.info("모집 마감 처리 완료: id={}", recruit.getId());
             }
         }
     }

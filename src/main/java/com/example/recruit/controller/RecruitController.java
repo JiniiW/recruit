@@ -26,25 +26,26 @@ import java.util.List;
  * File: RecruitController.java
  * Description: GET 요청을 처리하여 머스태치 화면을 반환하는 뷰 컨트롤러
  */
-@Controller
-@RequestMapping("/recruits")
-@RequiredArgsConstructor
 @Slf4j
+@Controller
+@RequiredArgsConstructor
+@RequestMapping("/recruits")
 public class RecruitController {
 
     private final RecruitService recruitService;
     private final CommentService commentService;
 
     private final RecruitRepository recruitRepository; // 변경필요
-    private final ParticipantRepository participantRepository; //변경필요
 
-    // 1. 대표 화면 (모든 모집글)
+    // 1. 모집글 전체 목록 화면
     @GetMapping
     public String list(@RequestParam String userId, Model model){
         log.info("모집글 전체 목록 화면 요청");
+
         List<Recruit> recruits = recruitService.index();
         model.addAttribute("recruits", recruits);
         model.addAttribute("userId", userId);
+
         return "recruits/list";
     }
 
@@ -52,6 +53,7 @@ public class RecruitController {
     @GetMapping("/{id}")
     public String show(@PathVariable("id") Long id, @RequestParam String userId, Model model) {
         log.info("모집글 상세 화면 요청 - ID: {}", id);
+
         Recruit recruit = recruitService.show(id);
         if (recruit == null) {
             return "redirect:/recruits?userId=" + userId;
@@ -77,6 +79,7 @@ public class RecruitController {
             isAuthor = true;
         }
 
+        // 작성자 및 참여자 여부 판별 - 버튼 분기에 사용
         boolean isParticipant = false;
         for (Participant participant : participants) {
             if (participant.getUserId().equals(userId)) {
@@ -93,13 +96,9 @@ public class RecruitController {
         model.addAttribute("currentCount", participants.size());
         model.addAttribute("recruitId", id);
 
-        // enum으로 status 관리
-        model.addAttribute("isOpen", RecruitStatus.OPEN.equals(recruit.getStatus()));
-        model.addAttribute("isFull", RecruitStatus.FULL.equals(recruit.getStatus()));
-        model.addAttribute("isClosed", RecruitStatus.CLOSED.equals(recruit.getStatus()));
-
         return "recruits/detail";
     }
+
     // 3. 모집글 등록 폼
     @GetMapping("/new")
     public String newRecruitForm(@RequestParam String userId, Model model) {
@@ -113,7 +112,11 @@ public class RecruitController {
         model.addAttribute("userId", userId);
 
         // 기존 작성 글
-        Recruit recruit = recruitRepository.findById(id).orElse(null);
+        Recruit recruit = recruitService.show(id);
+
+        // 현재 참여 인원
+        List<Participant> participants = recruitService.getParticipants(id);
+        model.addAttribute("currentCount", participants.size());
 
         model.addAttribute("recruit", recruit);
         return "recruits/form";
