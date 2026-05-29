@@ -4,6 +4,7 @@ import com.example.recruit.entity.Recruit;
 import com.example.recruit.entity.RecruitStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 
 import java.time.LocalDateTime;
@@ -16,6 +17,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @ToString
 @Getter
+@Setter
 public class RecruitForm {
 
     private Long id;

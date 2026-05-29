@@ -4,7 +4,6 @@ import com.example.recruit.dto.ParticipantResponseForm;
 import com.example.recruit.dto.RecruitForm;
 import com.example.recruit.entity.Participant;
 import com.example.recruit.entity.Recruit;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -18,7 +17,7 @@ public interface RecruitService {
     // 모든 모집글 조회
     List<Recruit> index();
 
-    // 모집글 확인
+    // 단건 모집글 조회
     Recruit show(Long id);
 
     // 모집글 생성
@@ -30,9 +29,12 @@ public interface RecruitService {
     // 모집글 삭제
     Recruit delete(Long id);
 
-    // insert participant, update recruit
+    // 모집글 참여자 목록
+    List<Participant> getParticipants(Long recruitId);
+
+    // 참가 신청
     ParticipantResponseForm join(Long recruitId, String userId);
 
-    // delete participant, update recruit
+    // 참가 취소
     ParticipantResponseForm leave(Long recruitId, String userId);
 }

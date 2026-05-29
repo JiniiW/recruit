@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * File: Recruit.java
@@ -21,8 +22,8 @@ import java.time.LocalDateTime;
 @Setter
 public class Recruit {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    Long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     private String title;
     private String content;
@@ -46,6 +47,13 @@ public class Recruit {
             this.district = dto.getDistrict();
         if (dto.getMaxCount() > 0)
             this.maxCount = dto.getMaxCount();
+        if (dto.getEndAt() != null)
+            this.endAt = dto.getEndAt();
+    }
+
+    public String getEndAtFormatted(){
+        if (endAt == null) return "";
+        return endAt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
     }
 
 }

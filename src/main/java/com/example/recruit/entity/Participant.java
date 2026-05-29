@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -17,13 +18,14 @@ import lombok.extern.slf4j.Slf4j;
 
 @Entity
 @NoArgsConstructor
+@AllArgsConstructor
 @ToString
 @Slf4j
 @Getter
 public class Participant {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private Long id;
     private Long recruitId;
     private String userId;
 

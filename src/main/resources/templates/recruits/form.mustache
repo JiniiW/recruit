@@ -7,7 +7,7 @@
         {{^recruit}}공범 모집하기{{/recruit}}
     </h2>
 
-    <form class="card p-4 shadow-sm" id="recruitForm" method="post" onsubmit="submitRecruit(event, '{{userId}}')">
+    <form class="card p-4 shadow-sm" onsubmit="submitRecruit(event, '{{userId}}')">
 
         {{#recruit}}
             <input type="hidden" name="authorId" value="{{authorId}}">

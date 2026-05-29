@@ -16,5 +16,4 @@ public interface RecruitRepository extends JpaRepository<Recruit, Long> {
     @Override
     ArrayList<Recruit> findAll();
 
-    ArrayList<Recruit> findByDistrict(String district);
 }
