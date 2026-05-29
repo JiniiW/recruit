@@ -1,9 +1,12 @@
 package com.example.recruit.controller;
 
+import com.example.recruit.dto.CommentForm;
 import com.example.recruit.dto.ParticipantResponseForm;
-import com.example.recruit.entity.Participant;
+import com.example.recruit.dto.RecruitForm;
+import com.example.recruit.entity.Comment;
+import com.example.recruit.entity.Recruit;
+import com.example.recruit.service.CommentService;
 import com.example.recruit.service.RecruitService;
-import jakarta.servlet.http.Part;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -21,24 +24,81 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class RecruitApiController {
 
     private final RecruitService recruitService;
+    private final CommentService commentService;
+
+    // 1. 모집글 생성
+    @PostMapping
+    public Recruit create(@RequestBody RecruitForm dto) {
+        log.info("모집글 생성 - 상세정보: {}", dto.toString());
+
+        return recruitService.create(dto);
+
+    }
+
+    // 2. 모집글 수정
+    @PatchMapping("/{id}")
+    public ResponseEntity<Recruit> update(@PathVariable Long id, @RequestBody RecruitForm dto) {
+
+        Recruit updated = recruitService.update(id, dto);
+
+        return (updated != null) ? ResponseEntity.ok(updated) : ResponseEntity.notFound().build();
+    }
+
+    // 3. 모집글 삭제
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Recruit> delete(@PathVariable Long id) {
+
+        Recruit deleted = recruitService.delete(id);
+
+        return (deleted != null)? ResponseEntity.ok(deleted) : ResponseEntity.notFound().build();
+    }
+
+    // 4. 댓글 작성
+    @PostMapping("/{recruitId}/comments")
+    public ResponseEntity<Comment> createComment(@PathVariable("recruitId") Long recruitId,
+                                                 @RequestParam String userId,
+                                                 @RequestBody CommentForm commentForm) {
+        log.info("댓글 작성 API 요청 - recruitId: {}, userId: {}", recruitId, userId);
+
+        Comment created = commentService.create(recruitId, userId, commentForm);
+
+        if (created == null) {
+            return ResponseEntity.badRequest().body(null);
+        }
+
+        return ResponseEntity.ok(created);
+    }
+
+    // 5. 댓글 삭제
+    @DeleteMapping("/{recruitId}/comments/{commentId}")
+    public ResponseEntity<Comment> deleteComment(@PathVariable("recruitId") Long recruitId,
+                                                 @PathVariable("commentId") Long commentId,
+                                                 @RequestParam String userId) {
+        log.info("댓글 삭제 API 요청 - recruitId: {}, commentId: {}, userId: {}",
+                recruitId, commentId, userId);
+
+        Comment deleted = commentService.delete(recruitId, commentId, userId);
+
+        if (deleted == null) {
+            return ResponseEntity.badRequest().body(null);
+        }
+
+        return ResponseEntity.ok(deleted);
+    }
 
     // 참여신청
-    @PostMapping("/{id}/join")
-    public ResponseEntity<ParticipantResponseForm> join(@PathVariable Long id, @RequestParam String userId, RedirectAttributes rttr){
-        ParticipantResponseForm join = recruitService.join(id, userId);
-//        if(join != null){
-//            rttr.addFlashAttribute("msg", "참가.");
-//        }
+    @PostMapping("/{recruitId}/join")
+    public ResponseEntity<ParticipantResponseForm> join(@PathVariable Long recruitId, @RequestParam String userId){
+        log.info("게시글 {}번 참여 요청 : userId: {}", recruitId, userId);
+        ParticipantResponseForm join = recruitService.join(recruitId, userId);
         return (join != null) ? ResponseEntity.ok(join) : ResponseEntity.notFound().build();
     }
 
     // 참여취소
-    @PostMapping("/{id}/leave")
-    public ResponseEntity<ParticipantResponseForm> leave(@PathVariable Long id, @RequestParam String userId, RedirectAttributes rttr){
-        ParticipantResponseForm leave = recruitService.leave(id, userId);
-//        if(leave != null){
-//            rttr.addFlashAttribute("msg", "참가 취소.");
-//        }
+    @DeleteMapping("/{recruitId}/leave")
+    public ResponseEntity<ParticipantResponseForm> leave(@PathVariable Long recruitId, @RequestParam String userId){
+        log.info("게시글 {}번 취소 요청 : userId: {}", recruitId, userId);
+        ParticipantResponseForm leave = recruitService.leave(recruitId, userId);
         return (leave != null) ? ResponseEntity.ok(leave) : ResponseEntity.badRequest().build();
     }
 }

@@ -1,0 +1,59 @@
+{{>layouts/header}}
+
+<div class="container mt-5" style="max-width: 600px;">
+
+    <h2 class="mb-4 text-center fw-bold">
+        {{#recruit}}수정하기{{/recruit}}
+        {{^recruit}}공범 모집하기{{/recruit}}
+    </h2>
+
+    <form class="card p-4 shadow-sm" onsubmit="submitRecruit(event, '{{userId}}')">
+
+        {{#recruit}}
+            <input type="hidden" name="authorId" value="{{authorId}}">
+            <input type="hidden" name="id" value="{{id}}">
+        {{/recruit}}
+
+        {{^recruit}}
+            <input type="hidden" name="authorId" value="{{userId}}">
+        {{/recruit}}
+
+        <div class="mb-3">
+            <label class="form-label fw-bold">모집 지역</label>
+            <input type="text" class="form-control" name="district" placeholder="예: 종로구, 강남구" value="{{#recruit}}{{district}}{{/recruit}}" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-bold">제목</label>
+            <input type="text" class="form-control" name="title" placeholder="예: 떡볶이 같이 배달 시키실 분!" value="{{#recruit}}{{title}}{{/recruit}}" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-bold">최대 모집 인원 (명)</label>
+            <input type="number" class="form-control" name="maxCount" min="2" max="10" value="{{#recruit}}{{maxCount}}{{/recruit}}{{^recruit}}2{{/recruit}}" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-bold">상세 내용</label>
+            <textarea class="form-control" name="content" rows="5" placeholder="배달 장소, 메뉴, 예상 시간 등을 적어주세요." required>{{#recruit}}{{content}}{{/recruit}}</textarea>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-bold">마감 시간</label>
+            <input type="datetime-local" class="form-control" name="endAt" value="{{#recruit}}{{endAt}}{{/recruit}}" required>
+        </div>
+
+        <div class="d-flex justify-content-between mt-4">
+            <a href="/recruits?userId={{userId}}" class="btn btn-secondary">취소</a>
+
+            <button type="submit" class="btn btn-primary px-4">
+                {{#recruit}}수정 완료{{/recruit}}
+                {{^recruit}}등록하기{{/recruit}}
+            </button>
+        </div>
+    </form>
+</div>
+
+{{>layouts/footer}}
+
+<script src="/js/recruit.js"></script>

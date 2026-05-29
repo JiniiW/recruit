@@ -1,27 +1,158 @@
-{{>layout/header}}
+{{>layouts/header}}
 
-{{userId}}
-<form id="joinForm" action="/api/recruits/{{id}}/join?userId={{userId}}" method="post">
-    <button type="submit" style="font-size: 13px; color: #fff; background: #3b82f6; border: none; padding: 7px 16px; border-radius: 6px; font-weight: 500; cursor: pointer;">
-        참가하기
-    </button>
-</form>
+{{#recruit}}
+    <div class="container mt-5">
+        <div class="card shadow-sm">
 
-{{>layout/footer}}
+            <div class="card-header bg-dark text-white d-flex align-items-center justify-content-between">
+                <h4 class="mb-0">[{{district}}] {{title}}</h4>
+                {{#isOpen}}
+                    <span class="badge bg-success">OPEN</span>
+                {{/isOpen}}
+                {{#isFull}}
+                    <span class="badge bg-warning text-dark">FULL</span>
+                {{/isFull}}
+                {{#isClosed}}
+                    <span class="badge bg-danger">CLOSED</span>
+                {{/isClosed}}
+            </div>
 
-<script>
-    document.getElementById("joinForm").addEventListener("submit", function(e) {
-        e.preventDefault();  // form 기본 동작 막기
+            <div class="card-body">
+                <table class="table table-bordered mt-2">
+                    <tbody>
+                    <tr>
+                        <th scope="row" class="table-light" style="width: 20%;">작성자</th>
+                        <td>{{authorId}}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row" class="table-light">모집 인원</th>
+                        <td>
+                            <strong>{{currentCount}}</strong> / <strong>{{maxCount}}</strong> 명
+                            <!-- 참여자 id -->
+                            {{#participants}}
+                                <span class="badge bg-light text-dark border ms-1">{{userId}}</span>
+                            {{/participants}}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row" class="table-light">모집 마감일</th>
+                        <td>{{endAtFormatted}}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row" class="table-light">상세 내용</th>
+                        <td style="height: 150px;" class="align-top">{{content}}</td>
+                    </tr>
+                    </tbody>
+                </table>
 
-        fetch(this.action, { method: "POST" })
-                .then(response => {
-                    if (response.ok) {
-                        // 성공하면 상세 페이지로 이동
-                        location.href = "/recruits/list/{{id}}?userId={{userId}}";
-                    }
-                });
-    });
-</script>
+                <!-- 참여/수정/삭제 버튼 -->
+                <div class="text-center my-4">
+                    {{#isAuthor}}
+                        {{^isClosed}}
+                            <a href="/recruits/{{id}}/edit?userId={{userId}}" class="btn btn-primary">
+                            수정하기
+                            </a>
+                            <button type="button"
+                                    class="btn btn-danger"
+                                    onclick="deleteRecruit({{id}}, '{{userId}}')">
+                                삭제하기
+                            </button>
+                        {{/isClosed}}
+                    {{/isAuthor}}
 
-<!-- 하단에 js 파일 import -->
+                    {{^isAuthor}}
+                        {{#isClosed}}
+                            <button type="button" class="btn btn-secondary" disabled>
+                                모집 마감
+                            </button>
+                        {{/isClosed}}
+
+                        {{#isFull}}
+                            {{#isParticipant}}
+                                <button type="button"
+                                        class="btn btn-outline-danger"
+                                        onclick="leaveRecruit({{id}}, '{{userId}}')">
+                                    참여 취소
+                                </button>
+                            {{/isParticipant}}
+                            {{^isParticipant}}
+                                <button type="button" class="btn btn-secondary" disabled>
+                                    모집 완료
+                                </button>
+                            {{/isParticipant}}
+                        {{/isFull}}
+
+                        {{#isOpen}}
+                            {{#isParticipant}}
+                                <button type="button"
+                                        class="btn btn-outline-danger"
+                                        onclick="leaveRecruit({{id}}, '{{userId}}')">
+                                    참여 취소
+                                </button>
+                            {{/isParticipant}}
+                            {{^isParticipant}}
+                                <button type="button"
+                                        class="btn btn-primary"
+                                        onclick="joinRecruit({{id}}, '{{userId}}')">
+                                    🕶️공범으로 합류하기
+                                </button>
+                            {{/isParticipant}}
+                        {{/isOpen}}
+                    {{/isAuthor}}
+                </div>
+
+                <hr>
+
+                <!-- 댓글 작성 -->
+                <h5 class="fw-bold mt-4">댓글</h5>
+                <form onsubmit="submitComment(event, {{id}}, '{{userId}}')">
+                    <div class="mb-3">
+                        <textarea id="commentContent"
+                                  name="content"
+                                  class="form-control"
+                                  rows="3"
+                                  placeholder="댓글을 입력하세요."
+                                  required></textarea>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-primary">댓글 작성</button>
+                    </div>
+                </form>
+
+                <hr>
+
+                <!-- 댓글 목록 -->
+                <div id="commentList">
+                    {{#comments}}
+                        <div class="card mb-2 comment-item" data-comment-id="{{id}}">
+                            <div class="card-body">
+                                <p class="mb-1"><strong>{{userId}}</strong></p>
+                                <p class="mb-2">{{content}}</p>
+                                {{#commentOwner}}
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-danger"
+                                            onclick="deleteComment({{id}}, {{recruitId}}, '{{userId}}')">
+                                        댓글 삭제
+                                    </button>
+                                {{/commentOwner}}
+                            </div>
+                        </div>
+                    {{/comments}}
+                    {{^comments}}
+                        <p id="noCommentText" class="text-muted">아직 댓글이 없습니다.</p>
+                    {{/comments}}
+                </div>
+            </div>
+
+            <!-- 목록으로 버튼 -->
+            <div class="card-footer bg-light">
+                <a href="/recruits?userId={{userId}}" class="btn btn-secondary">목록으로</a>
+            </div>
+
+        </div>
+    </div>
+{{/recruit}}
+
+{{>layouts/footer}}
+
 <script src="/js/recruit.js"></script>
