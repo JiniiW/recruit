@@ -48,6 +48,7 @@ public class RecruitServiceImpl implements RecruitService{
 
     // 3. 모집글 생성
     @Override
+    @Transactional
     public Recruit create(RecruitForm dto) {
         Recruit recruit = recruitRepository.save(dto.toEntity());
 
@@ -89,6 +90,7 @@ public class RecruitServiceImpl implements RecruitService{
 
     // 5. 모집글 삭제 (연관 참여자, 댓글 일괄 삭제)
     @Override
+    @Transactional
     public Recruit delete(Long id) {
         Recruit target = recruitRepository.findById(id).orElse(null);
 
@@ -113,6 +115,7 @@ public class RecruitServiceImpl implements RecruitService{
 
     // 7. 참여 신청 (참여자 저장 후 인원 초과 시 FULL 처리)
     @Override
+    @Transactional
     public ParticipantResponseForm join(Long recruitId, String userId) {
         Participant participant = new Participant(recruitId, userId);
         participantRepository.save(participant);
